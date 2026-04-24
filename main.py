@@ -39,7 +39,7 @@ start= max(0, top_idx- window)
 end= min(len(docs), top_idx+ window+ 1)
 context= " ".join(docs[start:end])
 
-summary= summarize(context, top_k= 3, query= query)
+summary= summarize(context, top_k= window, query= query)
 
 print("\nSummary:")
 for s in summary:
