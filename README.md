@@ -15,6 +15,7 @@
      - source venv/bin/activate
 4. Install dependencies
    - pip instal -r requirements.txt
+   - pip install ntlk
 5. Run the project
    - python main.py
 6. Deactivate
