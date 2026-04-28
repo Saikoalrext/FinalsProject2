@@ -1,5 +1,4 @@
 import os
-import sys
 
 from pdf_reader import extract_pdf_text
 from preprocessing import tokenize_clean, clean_text, split_sentences, is_valid_sentence, sentence_quality_score
