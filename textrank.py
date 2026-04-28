@@ -64,7 +64,7 @@ def query_boost(sentence_tokens, query_tokens):
     sent_set= set(sentence_tokens)
     query_set= set(query_tokens)
     overlap= len(sent_set& query_set)
-    return 1+ (1.5** overlap)
+    return 1+ (0.3** overlap)
 
 def summarize(text, top_k=3, vectors= None, df= None, N= None, query= None):
     sentences= split_sentences(text)

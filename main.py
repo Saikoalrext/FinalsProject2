@@ -74,7 +74,7 @@ if not results or results[0][1]== 0:
 
 top_idx= results[0][0]
 
-context_size= int(input("How many sentences to consider for summary: "))
+context_size= max(1, int(input("How many sentences to consider for summary: ")))
 
 context_indices= set()
 for idx, score in results:

@@ -1,4 +1,7 @@
 import re
+from nltk.stem import PorterStemmer
+
+ps= PorterStemmer()
 
 STOPWORDS= {
     "is","are","the","in","on","at","and","or","to","of","a","an","from","it", "this", "that", "with", "for", "as", "was", "were", "be", "been", "have", "has", "had", "do", "does", "did", "will", "would", "could"
@@ -7,7 +10,7 @@ STOPWORDS= {
 def is_valid_sentence(s):
     s_lower= s.lower()
 
-    if len(s.split())< 6:
+    if len(s.split())< 4:
         return False
     if re.match(r'^\d+\s+[A-Z]', s) and any(x in s_lower for x in ['citation', 'manuscript']):
         return False
@@ -27,7 +30,11 @@ def tokenize(text):
     return [t.lower() for t in re.findall(r'[a-zA-Z]+', text)]
 
 def tokenize_clean(text):
-    return [t for t in tokenize(text) if t not in STOPWORDS and len(t)> 2]
+    # return [t for t in tokenize(text) if t not in STOPWORDS and len(t)> 2]
+    return [
+        ps.stem(t)
+        for t in tokenize(text) if t not in STOPWORDS and len(t)> 2
+    ]
 
 def split_sentences(text):
     text= re.sub(r'([.!?])([A-Z])', r'\1 \2', text)

@@ -1,4 +1,3 @@
-from pdfminer.high_level import extract_text
 import fitz
 
 def extract_pdf_text(pdf_path):
