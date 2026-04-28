@@ -27,4 +27,10 @@ def search(query, vectors, df, N, docs, top_k=3):
         scores.append((i, max(0, base_scores+ quality)))
 
     scores.sort(key=lambda x: x[1], reverse=True)
+
+    threshold= 0.05
+    valid_scores= [(i, s) for i, s in scores if s> threshold]
+    if not valid_scores:
+        return []
+    
     return scores[:top_k]
