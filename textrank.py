@@ -91,7 +91,7 @@ def summarize(text, top_k=3, vectors= None, df= None, N= None, query= None):
         if set(tokens)& set(query_tokens):
             query_matching_indices.append(i)
 
-    print(f"Deug: {len(query_matching_indices)} sentences contain query terms")
+    # print(f"Debug: {len(query_matching_indices)} sentences contain query terms")
 
     vectors, df, N= compute_tfidf(tokenized_filtered)
     sim= build_similarity_matrix(vectors)

@@ -18,9 +18,13 @@ def select_pdf():
         path= input("No PDFs found. enter path to PDF: ").strip()
         return path if os.path.exists(path) else None
     
-    print(f"\nFound {len(pdfs)} PDF file(s):")
+    print(f"\n****************** PDF Files ******************\n\nFound {len(pdfs)} PDF file(s):")
     for i, p in enumerate(pdfs, 1):
-        print(f"  {i}. {p}")
+        if len(p)< 34:
+            print(f"  {i}. {p}")
+        elif len(p)>= 34:
+            print(f"  {i}. {p[:34]}... .pdf")
+    print(f"\n***********************************************")
     
     choice= input("\nEnter number or full path: ").strip()
 
