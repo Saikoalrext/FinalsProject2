@@ -9,12 +9,17 @@ def is_valid_sentence(s):
 
     if len(s.split())< 6:
         return False
-    if any(c.isdigit() for c in s[:10]) and ("citation" in s_lower or "manuscript" in s_lower):
+    if re.match(r'^\d+\s+[A-Z]', s) and any(x in s_lower for x in ['citation', 'manuscript']):
         return False
-    invalid= ["doi", "copyright", "correspondence", "citation", "manuscript", "revised", "reviewed", "received", "published", "creative commons", "license", "open-access", "email:", "eter", "vol.", "issue", "department", "accessed"]
+    if s.count('  ')> 2:
+        return False
+    invalid= ["doi", "copyright", "correspondence", "published", "revised", "reviewed", "received", "published", "creative commons", "license", "open-access", "email:", "vol.", "issue", "department", "accessed", "vol"]
     return not any(m in s_lower for m in invalid)
+
 def clean_text(text):
     text= re.sub(r'\n+', ' ', text)
+    text= re.sub(r'([.!?])\s*', r'\1 ', text)
+    text= re.sub(r'(?<=[a-zA-Z])\n\s*\d+\s+(?=[A-Z])', ' ', text)
     text= re.sub(r'([.!?])\s*', r'\1 ', text)
     return text.strip()
 
@@ -28,3 +33,21 @@ def split_sentences(text):
     text= re.sub(r'([.!?])([A-Z])', r'\1 \2', text)
     sentences= re.split(r'(?<=[.!?])\s+', text)
     return [s.strip() for s in sentences if len(s.strip())> 20]
+
+def sentence_quality_score(s):
+    score= 0
+    s_lower= s.lower()
+
+    if re.search(r'^(fig|figure)\b', s_lower):
+        score-= 20
+    if s.count('(')>= 2 and s.count(')')>= 2:
+        score -= 5
+    if re.match(r'^\s*\(', s):
+        score-= 10
+
+    if any(w in s_lower for w in ['however', 'therefore', 'moreover', 'consequently']):
+        score+= 3
+    if len(s.split())> 15:
+        score+= 2
+
+    return score

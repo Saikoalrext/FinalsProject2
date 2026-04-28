@@ -21,6 +21,15 @@ def textrank(sim, iterations= 20, d= 0.85, position_weights= None):
     if position_weights:
         for i in range(n):
             scores[i]*= position_weights[i]
+    
+    for i in range(n):
+        pos= i/ max(n-1, 1)
+        if pos< 0.2:
+            scores[i]*= 1.3
+        elif pos> 0.8:
+            scores[i]*= 0.7
+        elif 0.3< pos< 0.7:
+            scores[i]*= 1.1
 
     for _ in range(iterations):
         new_scores= [0.0]* n
@@ -55,14 +64,13 @@ def query_boost(sentence_tokens, query_tokens):
     sent_set= set(sentence_tokens)
     query_set= set(query_tokens)
     overlap= len(sent_set& query_set)
-    return 1+ (0.5* overlap)
+    return 1+ (1.5** overlap)
 
 def summarize(text, top_k=3, vectors= None, df= None, N= None, query= None):
     sentences= split_sentences(text)
-
     print(f"Debug: Found {len(sentences)} sentences to summarize")
 
-    if len(sentences)< top_k:
+    if len(sentences)<= top_k:
         return sentences
     
     tokenized= [tokenize_clean(s) for s in sentences]
@@ -75,11 +83,19 @@ def summarize(text, top_k=3, vectors= None, df= None, N= None, query= None):
     indices, sentences_filtered, tokenized_filtered= zip(*valid)
     indices= list(indices)
 
+
+    query_tokens= tokenize_clean(query) if query else []
+
+    query_matching_indices= []
+    for i, tokens in enumerate(tokenized_filtered):
+        if set(tokens)& set(query_tokens):
+            query_matching_indices.append(i)
+
+    print(f"Deug: {len(query_matching_indices)} sentences contain query terms")
+
     vectors, df, N= compute_tfidf(tokenized_filtered)
     sim= build_similarity_matrix(vectors)
     scores= textrank(sim)
-
-    query_tokens= tokenize_clean(query) if query else []
 
     final_scores= []
     for i in range(len(indices)):
@@ -96,5 +112,19 @@ def summarize(text, top_k=3, vectors= None, df= None, N= None, query= None):
     ranked= list(enumerate(final_scores))
     ranked.sort(key=lambda x: x[1], reverse= True)
 
-    selected= sorted([indices[i] for i, _ in ranked[:top_k]])
+    selected= []
+    ranked_indices= [i for i, _ in ranked]
+
+    if query_matching_indices:
+        best_match= max(query_matching_indices, key=lambda idx:final_scores[idx])
+        selected.append(indices[best_match])
+        ranked_indices= [i for i in ranked_indices if i!= best_match]
+    
+    for i in ranked_indices:
+        if len(selected)>= top_k:
+            break
+        if indices[i] not in selected:
+            selected.append(indices[i])
+
+    selected.sort()
     return [sentences[i] for i in selected]

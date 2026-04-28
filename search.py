@@ -1,6 +1,7 @@
 from collections import Counter
 import math
-from preprocessing import tokenize_clean
+import re
+from preprocessing import tokenize_clean, sentence_quality_score, clean_text, is_valid_sentence, split_sentences
 from similarity import cosine
 
 def build_query_vector(query, df, N):
@@ -15,13 +16,15 @@ def build_query_vector(query, df, N):
 
     return vec
 
-def search(query, vectors, df, N, top_k=3):
+def search(query, vectors, df, N, docs, top_k=3):
     q_vec= build_query_vector(query, df, N)
 
     scores= []
+
     for i, doc_vec in enumerate(vectors):
-        score = cosine(q_vec, doc_vec)
-        scores.append((i, score))
+        base_scores= cosine(q_vec, doc_vec)
+        quality= sentence_quality_score(docs[i])* 0.01
+        scores.append((i, max(0, base_scores+ quality)))
 
     scores.sort(key=lambda x: x[1], reverse=True)
     return scores[:top_k]
