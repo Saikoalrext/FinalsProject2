@@ -107,9 +107,46 @@ print(f"\nBuilt context from {len(context_indices)} sentences \n")
 
 summary= summarize(context, top_k= context_size, query= query)
 
+# print("\nSummary:")
+# for s, scores in enumerate(summary, 1):
+#     print(f"{idx}. [{scores:.4f}] {s}")
+# # for s, t in summary:
+# #     print("-", "[", t, "]", s)
+#     print(" ")
 print("\nSummary:")
-for s in summary:
-    print("-", s)
+summary_map= {}
+for idx, (s, score, i) in enumerate(summary, 1):
+    print(f"{idx}. [{score:.4f}] {s[:100]}...")
     print(" ")
+    doc_idx= context_indices[i]
+    summary_map[idx]= (i, doc_idx)
 
-print("Total sentences:", len(summary))
+while True:
+    choice= input(f"\nShow the whole paragraph (1-{len(summary)}), (99) to preview, (0) to exit: ").strip()
+    if choice== "0":
+        break
+    elif choice== "99":
+        print("\nSummary:")
+        for idx, (s, score, i) in enumerate(summary, 1):
+            print(f"{idx}. [{score:.4f}] {s[:100]}...")
+            print(" ")
+        continue
+    elif not choice.isdigit():
+        print("Input a number.")
+        continue
+
+    num= int(choice)
+    if num< 1 or num> len(summary):
+        print(f"Input 1-{len(summary)}")
+        continue
+
+    _,  doc_idx= summary_map[num]
+
+    start= max(0, doc_idx- 5)
+    end= min(len(docs), doc_idx+ 6)
+
+    print(f"\n{'='*60}")
+    for i in range(start, end):
+        prefix= ">>> " if i== doc_idx else "    "
+        print(f"{prefix}{docs[i]}")
+    print(f"{'='*60}")

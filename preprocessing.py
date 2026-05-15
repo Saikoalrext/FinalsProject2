@@ -18,8 +18,8 @@ def is_valid_sentence(s):
         return False
     if re.match(r'^\d+\s+[A-Z]', s) and any(x in s_lower for x in ['citation', 'manuscript']):
         return False
-    if s.count('  ')>= 2:
-        return False
+    # if s.count('  ')>= 2:
+    #     return False
     invalid= ["doi", "copyright", "correspondence", "published", "revised", "reviewed", "received", "published", "creative commons", "license", "open-access", "email:", "vol.", "issue", "department", "accessed", "vol", "keywords"]
     return not any(m in s_lower for m in invalid)
 

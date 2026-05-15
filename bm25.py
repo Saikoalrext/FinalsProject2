@@ -27,6 +27,9 @@ def bm25_score(query_tokens, doc_tokens, df, N, avgdl, k1= 1.2, b= 0.75):
 
         idf= math.log((N- df[term]+ 0.5)/(df[term]+ 0.5))+ 1
 
+        if idf< 0:
+            idf= 0.01
+
         # idf= math.log((N+ 1)/ (df[term]+ 1))+ 1
 
         f= tf[term]

@@ -56,7 +56,7 @@ def search(query, vectors, df, N, docs,tokenized_docs=None, top_k= 5):
     scores= []
 
     for i, docs_tokens in enumerate(tokenized_docs):
-        base= bm25_score(query_tokens, docs_tokens, df, N, avgdl, k1= 1.2, b=0.2)
+        base= bm25_score(query_tokens, docs_tokens, df, N, avgdl, k1= 1.2, b=0.75)
         cos= cosine(q_vec, vectors[i])
         # quality= (sentence_quality_score(docs[i])* 0.01)
 
@@ -70,9 +70,14 @@ def search(query, vectors, df, N, docs,tokenized_docs=None, top_k= 5):
     if all(score== 0 for _, score in scores):
         return[]
     
+    # for i, score in scores:
+    #     print(f"Doc {i}: score={score:.6f} -> {docs[i][:80]}...")
+    #     print(f"Query tokens: {query_tokens}")
+    #     print(f"BM25 df has query terms: {[(t, t in bm_df) for t in query_tokens]}")
+
     scores.sort(key=lambda x: x[1], reverse=True)
 
-    threshold= 0.01
+    threshold= 0.001
 
     valid= [(i,s) for i, s in scores if s> threshold]
 

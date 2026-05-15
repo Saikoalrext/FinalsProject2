@@ -78,18 +78,18 @@ def summarize(text, top_k=3, vectors= None, df= None, N= None, query= None):
     print(f"Found {len(sentences)} sentences to summarize")
 
     if len(sentences)<= top_k:
-        return sentences
+        tokenized= [tokenize_clean(s) for s in sentences]
+    #     return [(s, 0.0) for s in sentences]
     
-    tokenized= [tokenize_clean(s) for s in sentences]
+    # tokenized= [tokenize_clean(s) for s in sentences]
 
     valid= [(i, s, t) for i, (s, t) in enumerate(zip(sentences, tokenized)) if len(t)> 0]
 
-    if len(valid)< top_k:
-        return [s for _, s, _ in valid]
+    # if len(valid)< top_k:
+    #     return [(s, 0.0) for _, s, _ in valid]
 
     indices, sentences_filtered, tokenized_filtered= zip(*valid)
     indices= list(indices)
-
 
     query_tokens= tokenize_clean(query) if query else []
 
@@ -135,6 +135,10 @@ def summarize(text, top_k=3, vectors= None, df= None, N= None, query= None):
             break
         if indices[i] not in selected:
             selected.append(indices[i])
+        
+    score_map= {}
+    for i in range(len(indices)):
+        score_map[indices[i]]= final_scores[i]
 
     selected.sort()
-    return [sentences[i] for i in selected]
+    return [(sentences[i], score_map.get(i, 0.0), i) for i in selected]
