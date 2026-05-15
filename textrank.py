@@ -64,11 +64,18 @@ def query_boost(sentence_tokens, query_tokens):
     sent_set= set(sentence_tokens)
     query_set= set(query_tokens)
     overlap= len(sent_set& query_set)
-    return 1+ (0.3** overlap)
+    if overlap== 0:
+        return 1
+    else:
+        return 1+ (0.5* overlap)
 
 def summarize(text, top_k=3, vectors= None, df= None, N= None, query= None):
+    if not text or not text.strip():
+        return[]
     sentences= split_sentences(text)
-    print(f"Debug: Found {len(sentences)} sentences to summarize")
+    if not sentences:
+        return[]
+    print(f"Found {len(sentences)} sentences to summarize")
 
     if len(sentences)<= top_k:
         return sentences
@@ -116,9 +123,12 @@ def summarize(text, top_k=3, vectors= None, df= None, N= None, query= None):
     ranked_indices= [i for i, _ in ranked]
 
     if query_matching_indices:
-        best_match= max(query_matching_indices, key=lambda idx:final_scores[idx])
-        selected.append(indices[best_match])
-        ranked_indices= [i for i in ranked_indices if i!= best_match]
+        query_sorted= sorted(query_matching_indices, key=lambda idx: final_scores[idx], reverse=True)
+        for idx in query_sorted:
+            if len(selected)>= top_k:
+                break
+            if indices[idx] not in selected:
+                selected.append(indices[idx])
     
     for i in ranked_indices:
         if len(selected)>= top_k:

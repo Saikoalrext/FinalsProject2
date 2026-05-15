@@ -27,11 +27,17 @@ def select_pdf():
     print(f"\n***********************************************")
     
     choice= input("\nEnter number or full path: ").strip()
+    if not choice:
+        print("No selection made")
+        return None
 
     if choice.isdigit():
         idx= int(choice)- 1
         if 0<= idx< len(pdfs):
             return pdfs[idx]
+        else:
+            print(f"Invalid selection: {choice}")
+            return None
         
     if os.path.exists(choice):
         return choice
@@ -41,6 +47,7 @@ def select_pdf():
         if os.path.exists(choice):
             return choice
         
+    print(f"File not found: {choice}")
     return None
 
 pdf_path= select_pdf()
@@ -59,10 +66,13 @@ if not docs:
     exit()
 
 tokenized_docs= [tokenize_clean(d) for d in docs]
+if not any(tokenized_docs):
+    print("All sentences filtered out during tokenization")
+    exit(1)
 vectors, df, N= compute_tfidf(tokenized_docs)
 
 query= input("Enter search query: ")
-results= search(query, vectors, df, N, docs)
+results= search(query, vectors, df, N, docs, tokenized_docs)
 
 print("Search Results:")
 for i, score in results:
@@ -74,7 +84,8 @@ if not results or results[0][1]== 0:
 
 top_idx= results[0][0]
 
-context_size= max(1, int(input("How many sentences to consider for summary: ")))
+context_size= 99
+# context_size= max(1, int(input("How many sentences to consider for summary: ")))
 
 context_indices= set()
 for idx, score in results:
@@ -99,5 +110,6 @@ summary= summarize(context, top_k= context_size, query= query)
 print("\nSummary:")
 for s in summary:
     print("-", s)
+    print(" ")
 
 print("Total sentences:", len(summary))

@@ -35,10 +35,16 @@ def build_query_vector(query, df, N):
     
 #     return valid_scores[:top_k]
 
-def search(query, vectors, df, N, docs, top_k= 5):
+def search(query, vectors, df, N, docs,tokenized_docs=None, top_k= 5):
+    if not query or not query.strip():
+        return[]
     query_tokens= tokenize_clean(query)
+    if not query_tokens:
+        print("Warning: query contains no valid tokens after preprocessing")
+        return[]
 
-    tokenized_docs= [tokenize_clean(d) for d in docs]
+    if tokenized_docs is None:
+        tokenized_docs= [tokenize_clean(d) for d in docs]
 
     bm_df, lengths, avgdl, N= build_stats(tokenized_docs)
 

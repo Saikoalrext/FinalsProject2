@@ -4,7 +4,7 @@ from nltk.stem import PorterStemmer
 ps= PorterStemmer()
 
 STOPWORDS= {
-    "is","are","the","in","on","at","and","or","to","of","a","an","from","it", "this", "that", "with", "for", "as", "was", "were", "be", "been", "have", "has", "had", "do", "does", "did", "will", "would", "could"
+    "is","are","the","in","on","at","and","or","to","of","a","an","from","it", "this", "that", "with", "for", "as", "was", "were", "be", "been", "have", "has", "had", "do", "does", "did", "will", "would", "could", "by", "but"
 }
 
 def is_valid_sentence(s):
@@ -12,9 +12,13 @@ def is_valid_sentence(s):
 
     if len(s.split())< 4:
         return False
+    if re.search(r'\b\d+\s*[-–—]\s*\d+\b', s):
+        return False
+    if re.search(r'\b\d+\s*\(\d+\)', s): 
+        return False
     if re.match(r'^\d+\s+[A-Z]', s) and any(x in s_lower for x in ['citation', 'manuscript']):
         return False
-    if s.count('  ')> 2:
+    if s.count('  ')>= 2:
         return False
     invalid= ["doi", "copyright", "correspondence", "published", "revised", "reviewed", "received", "published", "creative commons", "license", "open-access", "email:", "vol.", "issue", "department", "accessed", "vol", "keywords"]
     return not any(m in s_lower for m in invalid)
@@ -23,7 +27,6 @@ def clean_text(text):
     text= re.sub(r'\n+', ' ', text)
     text= re.sub(r'([.!?])\s*', r'\1 ', text)
     text= re.sub(r'(?<=[a-zA-Z])\n\s*\d+\s+(?=[A-Z])', ' ', text)
-    text= re.sub(r'([.!?])\s*', r'\1 ', text)
     return text.strip()
 
 def tokenize(text):

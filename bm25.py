@@ -16,7 +16,7 @@ def build_stats(tokenized_docs):
 
     return df, lengths, avgdl, N
 
-def bm25_score(query_tokens, doc_tokens, df, N, avgdl, k1= 1.2, b= 0.2):
+def bm25_score(query_tokens, doc_tokens, df, N, avgdl, k1= 1.2, b= 0.75):
     tf= Counter(doc_tokens)
     score= 0
     dl= len(doc_tokens)
@@ -25,9 +25,9 @@ def bm25_score(query_tokens, doc_tokens, df, N, avgdl, k1= 1.2, b= 0.2):
         if term not in tf or term not in df:
             continue
 
-        # idf= math.log((N- df[term]+ 0.5)/(df[term]+ 0.5))+ 1
+        idf= math.log((N- df[term]+ 0.5)/(df[term]+ 0.5))+ 1
 
-        idf= math.log((N+ 1)/ (df[term]+ 1))+ 1
+        # idf= math.log((N+ 1)/ (df[term]+ 1))+ 1
 
         f= tf[term]
 
