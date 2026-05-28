@@ -8,6 +8,7 @@ from textrank import summarize
 
 def select_pdf():
     pdfs= []
+    pdfholder= ["hehe"]
     for root, dirs, files in os.walk('.'):
         dirs[:]= [d for d in dirs if not d.startswith('.') and d!= 'venv']
         for f in files:
@@ -15,40 +16,55 @@ def select_pdf():
                 pdfs.append(os.path.join(root,f))
     pdfs= [p[2:] if p.startswith('./') else p for p in pdfs]
     if not pdfs:
-        path= input("No PDFs found. enter path to PDF: ").strip()
+        path= input("\nNo PDFs found. enter path to PDF: ").strip()
         return path if os.path.exists(path) else None
     
-    print(f"\n****************** PDF Files ******************\n\nFound {len(pdfs)} PDF file(s):")
-    for i, p in enumerate(pdfs, 1):
-        if len(p)< 34:
-            print(f"  {i}. {p}")
-        elif len(p)>= 34:
-            print(f"  {i}. {p[:34]}... .pdf")
-    print(f"\n***********************************************")
-    
-    choice= input("\nEnter number or full path: ").strip()
-    if not choice:
-        print("No selection made")
-        return None
-
-    if choice.isdigit():
-        idx= int(choice)- 1
-        if 0<= idx< len(pdfs):
-            return pdfs[idx]
-        else:
-            print(f"Invalid selection: {choice}")
+    while True:
+        print(f"\n****************** PDF Files ******************\n\nFound {len(pdfs)} PDF file(s):")
+        for i, p in enumerate(pdfs, 1):
+            pdfholder.append(p)
+            if len(p)< 34:
+                print(f"  {i}. {p}")
+            elif len(p)>= 34:
+                print(f"  {i}. {p[:34]}... .pdf")
+        print(f"\n***********************************************")
+        choice1= input("\n1. Pick\n2. Full name\n0. Exit\n\nInput: ")
+        if choice1== "0":
             return None
-        
-    if os.path.exists(choice):
-        return choice
-    
-    if not choice.lower().endswith('.pdf'):
-        choice+= '.pdf'
-        if os.path.exists(choice):
-            return choice
-        
-    print(f"File not found: {choice}")
-    return None
+        elif not choice1.isdigit():
+            print("Input a number.")
+            continue
+        elif choice1== "1":
+            choice= input("\nEnter number or full path: ").strip()
+            if not choice:
+                print("No selection made")
+                return None
+
+            if choice.isdigit():
+                idx= int(choice)- 1
+                if 0<= idx< len(pdfs):
+                    return pdfs[idx]
+                else:
+                    print(f"Invalid selection: {choice}")
+                    return None
+                
+            if os.path.exists(choice):
+                return choice
+            
+            if not choice.lower().endswith('.pdf'):
+                choice+= '.pdf'
+                if os.path.exists(choice):
+                    return choice
+                
+            print(f"File not found: {choice}")
+            continue
+        elif choice1== "2":
+            choice2= input("\nEnter number: ")
+            if not choice2.isdigit():
+                print("Input 1 or 2")
+                continue
+            c2holder= int(choice2)
+            print(f"  - {pdfholder[c2holder]}")
 
 pdf_path= select_pdf()
 
@@ -71,16 +87,27 @@ if not any(tokenized_docs):
     exit(1)
 vectors, df, N= compute_tfidf(tokenized_docs)
 
-query= input("Enter search query: ")
-results= search(query, vectors, df, N, docs, tokenized_docs)
+# query= input("\nEnter search query (\"exit program\" to quit): ").strip()
 
-print("Search Results:")
-for i, score in results:
-    print(f"Doc {i}: {score:.4f} -> {docs[i][:100]}...")
+def safe_search(query, vectors, df, N, docs, tokenized_docs):
+    if not query or not query.strip():
+        return []
+    if query.lower().strip()== "exit program":
+        exit()
+    return search(query, vectors, df, N, docs, tokenized_docs)
 
-if not results or results[0][1]== 0:
-    print("No relevant results found")
-    exit()
+def get_results_with_retry(docs, vectors, df, N, tokenized_docs):
+    while True:
+        query= input("\nEnter search query (\"exit program\" to quit): ").strip()
+        results= safe_search(query, vectors, df, N, docs, tokenized_docs)
+        if results and results[0][1]> 0:
+            print("\nSearch Results:")
+            for i, score in results:
+                print(f"Doc {i}: {score:.4f} -> {docs[i][:100]}...")
+            return results, query
+        print("No relevant results found.")
+
+results, query= get_results_with_retry(docs, vectors, df, N, tokenized_docs)
 
 top_idx= results[0][0]
 
@@ -96,9 +123,10 @@ for idx, score in results:
             break
 
 context_indices= sorted(context_indices)
+context_sentences= []
 context= " ".join([docs[i] for i in context_indices])
 
-print(f"\nBuilt context from {len(context_indices)} sentences \n")
+# print(f"\nBuilt context from {len(context_indices)} sentences \n")
 
 # window= int(input("How many sentences around top result to consider: "))
 # start= max(0, top_idx- window)
@@ -113,40 +141,92 @@ summary= summarize(context, top_k= context_size, query= query)
 # # for s, t in summary:
 # #     print("-", "[", t, "]", s)
 #     print(" ")
-print("\nSummary:")
+print("\nContext:")
 summary_map= {}
+placeholder= ["hehe"]
+numberholder= [0]
+
 for idx, (s, score, i) in enumerate(summary, 1):
     print(f"{idx}. [{score:.4f}] {s[:100]}...")
     print(" ")
     doc_idx= context_indices[i]
     summary_map[idx]= (i, doc_idx)
+    placeholder.append(docs[doc_idx])
+    numberholder.append(score)
 
 while True:
-    choice= input(f"\nShow the whole paragraph (1-{len(summary)}), (99) to preview, (0) to exit: ").strip()
-    if choice== "0":
+    choice1= input(f"\n*********************\n\n1. Summarize\n2. Show full sentence\n3. Show whole paragraph\n00. Preview\n0. Exit\n\n*********************\n\nInput: ").strip()
+    if choice1== "0":
         break
-    elif choice== "99":
-        print("\nSummary:")
+    elif choice1== "00":
+        print("\nContext:")
         for idx, (s, score, i) in enumerate(summary, 1):
             print(f"{idx}. [{score:.4f}] {s[:100]}...")
             print(" ")
         continue
-    elif not choice.isdigit():
-        print("Input a number.")
+    elif choice1== "1":
+        print(" ")
+        print(f"{'*'*60}")
+        for i in range(len(summary)):
+            if numberholder[i]>= 5.0:
+                print(f"    {placeholder[i]}")
+        print(f"{'*'*60}")
         continue
+    elif choice1== "2":
+        choice2= input(f"\nWhich sentence (1-{len(summary)}): ").strip()
+        if not choice2.isdigit():
+            print("Input a number.")
+            continue 
+        holder= int(choice2)
+        print(f"- {placeholder[holder]}")
+    elif choice1== "3":
+        choice= input(f"\nWhich sentence (1-{len(summary)}): ").strip()
+        if not choice.isdigit():
+            print("Input a number.")
+            continue
 
-    num= int(choice)
-    if num< 1 or num> len(summary):
-        print(f"Input 1-{len(summary)}")
-        continue
+        num= int(choice)
+        if num< 1 or num> len(summary):
+            print(f"Input 1-{len(summary)}")
+            continue
 
-    _,  doc_idx= summary_map[num]
+        _,  doc_idx= summary_map[num]
 
-    start= max(0, doc_idx- 5)
-    end= min(len(docs), doc_idx+ 6)
+        start= max(0, doc_idx- 5)
+        end= min(len(docs), doc_idx+ 6)
 
-    print(f"\n{'='*60}")
-    for i in range(start, end):
-        prefix= ">>> " if i== doc_idx else "    "
-        print(f"{prefix}{docs[i]}")
-    print(f"{'='*60}")
+        print(f"\n{'*'*60}")
+        for i in range(start, end):
+            prefix= ">>> " if i== doc_idx else "    "
+            print(f"{prefix}{docs[i]}")
+        print(f"{'*'*60}")
+
+# while True:
+#     choice= input(f"\nShow the whole paragraph (1-{len(summary)}), (99) to preview, (0) to exit: ").strip()
+#     if choice== "0":
+#         break
+#     elif choice== "99":
+#         print("\nContext:")
+#         for idx, (s, score, i) in enumerate(summary, 1):
+#             print(f"{idx}. [{score:.4f}] {s[:100]}...")
+#             print(" ")
+#         continue
+#     elif not choice.isdigit():
+#         print("Input a number.")
+#         continue
+
+#     num= int(choice)
+#     if num< 1 or num> len(summary):
+#         print(f"Input 1-{len(summary)}")
+#         continue
+
+#     _,  doc_idx= summary_map[num]
+
+#     start= max(0, doc_idx- 5)
+#     end= min(len(docs), doc_idx+ 6)
+
+#     print(f"\n{'='*60}")
+#     for i in range(start, end):
+#         prefix= ">>> " if i== doc_idx else "    "
+#         print(f"{prefix}{docs[i]}")
+#     print(f"{'='*60}")
