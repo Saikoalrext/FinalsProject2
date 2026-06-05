@@ -6,18 +6,22 @@
 
 ### Installation
 1. Clone repository
-2. Create virtual environment
+2. Change directory
+   - cd FinalsProject2
+3. Create virtual environment
    - python -m venv venv
-3. Activate virtual environment
+4. Activate virtual environment
    - Windows:
      - venv\Scripts\activate
    - Linux/macOS:
      - source venv/bin/activate
-4. Install dependencies
+5. Install dependencies
    - pip install --upgrade pip
    - pip install pymupdf
    - pip install nltk
-5. Run the project
+6. Run the project
    - python main.py
-6. Deactivate
+7. Select path
+   - 
+8. Deactivate
    - deactivate
