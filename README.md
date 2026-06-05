@@ -14,7 +14,8 @@
    - Linux/macOS:
      - source venv/bin/activate
 4. Install dependencies
-   - pip install -r requirements.txt
+   - pip install --upgrade pip
+   - pip install pymupdf
    - pip install nltk
 5. Run the project
    - python main.py
