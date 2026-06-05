@@ -30,6 +30,7 @@ def select_pdf():
         print(f"\n***********************************************")
         choice1= input("\n1. Pick\n2. Full name\n0. Exit\n\nInput: ")
         if choice1== "0":
+            exit()
             return None
         elif not choice1.isdigit():
             print("Input a number.")
