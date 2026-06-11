@@ -22,6 +22,7 @@
 6. Run the project
    - python main.py
 7. Select path
-   - 
+   - Linux example:
+     - /home/user/Downloads/paper.pdf
 8. Deactivate
    - deactivate
