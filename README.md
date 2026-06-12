@@ -9,7 +9,10 @@
 2. Change directory
    - cd FinalsProject2
 3. Create virtual environment
-   - python -m venv venv
+   - Windows:
+     py -m venv venv
+   - Linux:  
+     - python -m venv venv
 4. Activate virtual environment
    - Windows:
      - venv\Scripts\activate
@@ -20,9 +23,18 @@
    - pip install pymupdf
    - pip install nltk
 6. Run the project
-   - python main.py
+   - Windows:
+     - py main.py
+   - Linux:  
+     - python main.py
 7. Select path
+   - Windows example:
+     - C:\Users\user\Downloads\paper
+     (If there's a space)
+     - C:\Users\user\Downloads\my paper
    - Linux example:
-     - /home/user/Downloads/paper.pdf
+     - /home/user/Downloads/paper
+     (If there's a space)
+     - /home/user/Downloads/my paper
 8. Deactivate
    - deactivate
