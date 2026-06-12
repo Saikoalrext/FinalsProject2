@@ -6,6 +6,7 @@
 
 ### Installation
 1. Clone repository
+   - git clone https://github.com/Saikoalrext/FinalsProject2
 2. Change directory
    - cd FinalsProject2
 3. Create virtual environment
