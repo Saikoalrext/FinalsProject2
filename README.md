@@ -31,11 +31,9 @@
 7. Select path
    - Windows example:
      - C:\Users\user\Downloads\paper
-     (If there's a space)
-     - C:\Users\user\Downloads\my paper
+     - (If there's a space) C:\Users\user\Downloads\my paper
    - Linux example:
      - /home/user/Downloads/paper
-     (If there's a space)
-     - /home/user/Downloads/my paper
+     - (If there's a space) /home/user/Downloads/my paper
 8. Deactivate
    - deactivate
