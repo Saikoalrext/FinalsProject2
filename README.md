@@ -11,7 +11,7 @@
    - cd FinalsProject2
 3. Create virtual environment
    - Windows:
-     py -m venv venv
+     - py -m venv venv
    - Linux:  
      - python -m venv venv
 4. Activate virtual environment
