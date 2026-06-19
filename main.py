@@ -1,4 +1,6 @@
 import os
+import platform
+import subprocess
 
 from pdf_reader import extract_pdf_text
 from preprocessing import tokenize_clean, clean_text, split_sentences, is_valid_sentence, sentence_quality_score
@@ -68,6 +70,25 @@ def select_pdf():
             print(f"  - {pdfholder[c2holder]}")
 
 # pdf_path= select_pdf()
+
+def open_pdf(pdf_path):
+    if not pdf_path or not os.path.exists(pdf_path):
+        print("PDF file not found.")
+        return False
+    
+    system= platform.system()
+
+    try:
+        if system== 'Windows':
+            os.startfile(pdf_path)
+        elif system== 'Darwin':
+            subprocess.run(['open', pdf_path], check=True)
+        else:
+            subprocess.run(['xdg-open', pdf_path], check=True)
+        return True
+    except Exception as e:
+        print(f"Could not open PDF: {e}")
+        return False
 
 def load_and_process_pdf(pdf_path):
     cached= load_cache(pdf_path)
@@ -139,7 +160,7 @@ def build_summary_context(results, docs, context_size= 99):
         if score> 0:
             for j in range(max(0, idx- 1), min(len(docs), idx+ 2)):
                 context_indices.add(j)
-            if len(context_indices)>= context_size* 2:
+            if len(context_indices)>= 999:
                 break
 
     context_indices= sorted(context_indices)
@@ -163,9 +184,9 @@ def display_summary(summary, context_indices, docs):
     
     return summary_map, placeholder, numberholder
 
-def show_summarize_menu(summary_map, placeholder, numberholder, docs, summary):
+def show_summarize_menu(summary_map, placeholder, numberholder, docs, summary, pdf_path):
     while True:
-        choice1= input(f"\n{'*'*30}\n\n1. Summarize\n2. Show full sentence\n3. Show whole paragraph\n4. New search (Same PDF)\n5. New PDF\n6. Clear cache\n00. Preview\n0. Exit\n\n{'*'*30}\n\nInput: ").strip()
+        choice1= input(f"\n{'*'*30}\n\n1. Summarize\n2. Show full sentence\n3. Show whole paragraph\n4. New search (Same PDF)\n5. New PDF\n6. Clear cache\n7. Open PDF file\n00. Preview\n0. Exit\n\n{'*'*30}\n\nInput: ").strip()
         if choice1== "0":
             return "exit"
         elif choice1== "00":
@@ -235,6 +256,14 @@ def show_summarize_menu(summary_map, placeholder, numberholder, docs, summary):
         elif choice1== "6":
             clear_cache()
             continue
+        elif choice1== "7":
+            print(f"Opening: {pdf_path}")
+            success= open_pdf(pdf_path)
+            if success:
+                print("PDF opened in default application.")
+            else:
+                print("Failed to open PDF")
+            continue
 
         else:
             print("Invalid choice")
@@ -260,7 +289,7 @@ def main():
 
         summary_map, placeholder, numberholder= display_summary(summary, context_indices, docs)
 
-        action= show_summarize_menu(summary_map, placeholder, numberholder, docs, summary)
+        action= show_summarize_menu(summary_map, placeholder, numberholder, docs, summary, pdf_path)
 
         if action == "exit":
             break
